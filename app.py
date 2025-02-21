@@ -8,14 +8,15 @@ from nltk.corpus import stopwords
 nltk.download('punkt')
 nltk.download('stopwords')
 
-# Load a pre-trained medical Q&A model
-med_chatbot = pipeline("question-answering", model="timpal0l/mdeberta-v3-base-squad2")
+# Load a more accurate medical Q&A model
+med_chatbot = pipeline("question-answering", model="deepset/roberta-base-squad2")  # Better than 'mdeberta-v3-base-squad2'
 
-# Define a generic medical knowledge context
+# Medical context for more accurate responses
 medical_context = """
-Common symptoms of flu include fever, cough, sore throat, muscle aches, fatigue, and chills. 
+Flu symptoms include fever, cough, sore throat, muscle aches, fatigue, and chills. 
 Diabetes symptoms include increased thirst, frequent urination, hunger, fatigue, and blurred vision.
-It's important to take prescribed medications regularly and consult a doctor before making any changes.
+Hypertension can cause headaches, dizziness, and shortness of breath.
+Always consult a doctor before changing your medication.
 """
 
 # Function for text preprocessing using NLTK
@@ -28,7 +29,7 @@ def preprocess_text(text):
 def healthcare_chatbot(user_input):
     cleaned_input = preprocess_text(user_input)  # Preprocess user input
     if cleaned_input:
-        response = med_chatbot(question=cleaned_input, context=medical_context)
+        response = med_chatbot(question=cleaned_input, context=medical_context)  # Ensure model gets proper context
         return response["answer"]
     return "I'm sorry, I couldn't understand that. Please try again."
 
