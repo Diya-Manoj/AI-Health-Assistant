@@ -4,20 +4,27 @@ import nltk
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 
-# Download necessary NLTK data
+# Explicitly download necessary NLTK resources
 nltk.download('punkt')
 nltk.download('stopwords')
+nltk.data.path.append("/tmp")  # Ensure download path is correct
 
-# Load a more accurate medical Q&A model
-med_chatbot = pipeline("question-answering", model="deepset/roberta-base-squad2")  # Better than 'mdeberta-v3-base-squad2'
+# Load the medical Q&A model on demand (prevents caching issues)
+def load_model():
+    return pipeline("question-answering", model="deepset/roberta-base-squad2")
 
-# Medical context for more accurate responses
-medical_context = """
-Flu symptoms include fever, cough, sore throat, muscle aches, fatigue, and chills. 
-Diabetes symptoms include increased thirst, frequent urination, hunger, fatigue, and blurred vision.
-Hypertension can cause headaches, dizziness, and shortness of breath.
-Always consult a doctor before changing your medication.
-"""
+# Function to fetch context dynamically (This can be expanded later)
+def get_medical_context(user_input):
+    context_dict = {
+        "flu": "Flu symptoms include fever, cough, sore throat, muscle aches, fatigue, and chills.",
+        "diabetes": "Diabetes symptoms include increased thirst, frequent urination, hunger, fatigue, and blurred vision.",
+        "hypertension": "Hypertension can cause headaches, dizziness, and shortness of breath.",
+        "medication": "Always consult a doctor before changing your medication."
+    }
+    for keyword, context in context_dict.items():
+        if keyword in user_input.lower():
+            return context
+    return "Please provide more details for an accurate response."
 
 # Function for text preprocessing using NLTK
 def preprocess_text(text):
@@ -25,11 +32,13 @@ def preprocess_text(text):
     filtered_tokens = [word for word in tokens if word.isalnum() and word not in stopwords.words("english")]
     return " ".join(filtered_tokens)  # Return cleaned text
 
-# Function to process user input
+# Function to process user input dynamically
 def healthcare_chatbot(user_input):
     cleaned_input = preprocess_text(user_input)  # Preprocess user input
     if cleaned_input:
-        response = med_chatbot(question=cleaned_input, context=medical_context)  # Ensure model gets proper context
+        chatbot = load_model()  # Reload model every time to prevent caching issues
+        context = get_medical_context(cleaned_input)  # Get dynamic context
+        response = chatbot(question=cleaned_input, context=context)
         return response["answer"]
     return "I'm sorry, I couldn't understand that. Please try again."
 
