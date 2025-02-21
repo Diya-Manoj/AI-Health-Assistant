@@ -1,45 +1,50 @@
 import streamlit as st
 from transformers import pipeline
 import nltk
-from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
 
 # Download necessary NLTK data
 nltk.download('punkt')
 nltk.download('stopwords')
 
+# Load a pre-trained medical Q&A model
+med_chatbot = pipeline("question-answering", model="timpal0l/mdeberta-v3-base-squad2")
 
-#load a pre-trained hugging face model
-chatbot = pipeline("question-answering", model="timpal0l/mdeberta-v3-base-squad2")
+# Define a generic medical knowledge context
+medical_context = """
+Common symptoms of flu include fever, cough, sore throat, muscle aches, fatigue, and chills. 
+Diabetes symptoms include increased thirst, frequent urination, hunger, fatigue, and blurred vision.
+It's important to take prescribed medications regularly and consult a doctor before making any changes.
+"""
 
+# Function for text preprocessing using NLTK
+def preprocess_text(text):
+    tokens = word_tokenize(text.lower())  # Convert to lowercase and tokenize
+    filtered_tokens = [word for word in tokens if word.isalnum() and word not in stopwords.words("english")]
+    return " ".join(filtered_tokens)  # Return cleaned text
 
-#Define healthcare-specific response logic (or use a model to generate responses)
+# Function to process user input
 def healthcare_chatbot(user_input):
-    #Simple rule based keywords to respond
-    if "symptom" in user_input:
-        return "It seems like you are experiencing symptoms. Please consult a doctor for accurate advice."
-    elif "appointment" in user_input:
-        return "Would you like to schedule an appointment with the doctor?"
-    elif "medication" in user_input:
-        return "It's important to take prescribed medicines regularly. If you have any concerns, consult your doctor."
-    else:
-        # Foe other inputs, use the hugging face model to generate a response
-        response = chatbot(user_input,max_length=300,num_return_sequences=1)
-        # Specifies the maximum length of te generated text response, including the input and the generated tokens.
-        # If set to 3, te model generates three different possible responses based on the input.
-        return response[0]['generated_text']
-  
-# Streamlit Web app interface
+    cleaned_input = preprocess_text(user_input)  # Preprocess user input
+    if cleaned_input:
+        response = med_chatbot(question=cleaned_input, context=medical_context)
+        return response["answer"]
+    return "I'm sorry, I couldn't understand that. Please try again."
+
+# Streamlit web app
 def main():
-    st.title("AI Healthcare Assistant")
-    user_input = st.text_input("How can I assist you today?")
+    st.title("Healthcare Assistant Chatbot")
+
+    # User input field
+    user_input = st.text_input("Ask your health-related question:", "")
+
     if st.button("Submit"):
         if user_input:
-            st.write("User: ",user_input)
-            with st.spinner("Processing your Query, Please Wait...."):
-                response = healthcare_chatbot(user_input)
-            st.write("Healthcare Assistant: ",response)
+            response = healthcare_chatbot(user_input)
+            st.write("Healthcare Assistant: ", response)
         else:
             st.write("Please enter a query.")
-    
-main()
+
+if __name__ == "__main__":
+    main()
