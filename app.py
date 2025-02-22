@@ -1,3 +1,10 @@
+import asyncio
+
+# Fixes "no running event loop" error in Streamlit
+try:
+    asyncio.get_running_loop()
+except RuntimeError:
+    asyncio.run(asyncio.sleep(0))
 import streamlit as st
 from langchain.chains import RetrievalQA
 from langchain_community.embeddings import HuggingFaceEmbeddings
