@@ -1,10 +1,3 @@
-import asyncio
-
-# Fixes "no running event loop" error in Streamlit
-try:
-    asyncio.get_running_loop()
-except RuntimeError:
-    asyncio.run(asyncio.sleep(0))
 import streamlit as st
 from langchain.chains import RetrievalQA
 from langchain_community.embeddings import HuggingFaceEmbeddings
@@ -17,6 +10,14 @@ import torch
 
 FAISS_INDEX_PATH = "faiss_index"
 
+import asyncio
+
+# Fixes "no running event loop" error in Streamlit
+try:
+    asyncio.get_running_loop()
+except RuntimeError:
+    asyncio.run(asyncio.sleep(0))
+    
 # ✅ Optimize Model Loading: Cache to prevent reloading on each query
 @st.cache_resource
 def load_model():
