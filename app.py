@@ -1,45 +1,47 @@
 import streamlit as st
 import os
 import asyncio
+from langchain.chains import RetrievalQA
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.vectorstores import FAISS
+from langchain_community.document_loaders import WikipediaLoader
+from langchain_community.llms import HuggingFacePipeline
+from transformers import pipeline
+import wikipediaapi
 
-# ✅ Fix "No Running Event Loop" Error
+# ✅ Fix "No Running Event Loop" Issue
 try:
     asyncio.get_running_loop()
 except RuntimeError:
     asyncio.run(asyncio.sleep(0))
 
-# ✅ Dynamically Install Missing Dependencies
+# ✅ Fix Missing Torch Installation
 try:
     import torch
 except ImportError:
-    os.system("pip install torch")
+    os.system("pip install torch torchvision torchaudio")
     import torch
-
-try:
-    import wikipediaapi
-except ImportError:
-    os.system("pip install wikipedia-api")
-    import wikipediaapi
-
-from langchain.chains import RetrievalQA
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain.vectorstores import FAISS
-from langchain.document_loaders import WikipediaLoader
-from langchain_community.llms import HuggingFacePipeline
-from transformers import pipeline
 
 FAISS_INDEX_PATH = "faiss_index"
 
-# ✅ Optimize Model Loading: Cache the Model
+# ✅ Load Model (Cache to Reduce Loading Time)
 @st.cache_resource
 def load_model():
     return pipeline("summarization", model="sshleifer/distilbart-cnn-12-6", 
-                    device=0 if torch.cuda.is_available() else -1)  # ✅ Uses a smaller, faster model
+                    device=0 if torch.cuda.is_available() else -1)
 
 hf_pipeline = load_model()
 llm = HuggingFacePipeline(pipeline=hf_pipeline)
 
-# ✅ Optimize FAISS Retrieval: Save & reload prebuilt index
+# ✅ Fix Wikipedia Loading with Correct Package
+wiki = wikipediaapi.Wikipedia("en")
+page = wiki.page("Diabetes")
+if page.exists():
+    summary = page.summary[:500]
+else:
+    summary = "Wikipedia page not found."
+
+# ✅ Optimize FAISS Retrieval
 @st.cache_resource
 def load_vectorstore():
     embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
@@ -54,7 +56,7 @@ def load_vectorstore():
 
 vectorstore = load_vectorstore()
 
-# ✅ Avoid Re-Initializing Model & Retriever on Every Query
+# ✅ Avoid Re-Initializing Model on Every Query
 if "qa_chain" not in st.session_state:
     st.session_state.qa_chain = RetrievalQA.from_llm(llm=llm, retriever=vectorstore.as_retriever())
 
