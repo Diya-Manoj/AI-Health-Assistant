@@ -1,6 +1,6 @@
 import streamlit as st
 from langchain.chains import RetrievalQA
-from langchain.embeddings import HuggingFaceEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings  # Updated Import
 from langchain.vectorstores import FAISS
 from langchain.document_loaders import WikipediaLoader
 from langchain.llms import HuggingFacePipeline
