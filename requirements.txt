@@ -1,12 +1,9 @@
 streamlit
 transformers
-torch
-tensorflow
 nltk
 tf-keras
 langchain==0.1.12
 langchain-community
 faiss-cpu
 sentence-transformers
-wikipedia
-torch==2.0.1
+wikipedia-api
