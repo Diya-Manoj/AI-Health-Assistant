@@ -3,3 +3,7 @@ transformers
 tensorflow
 nltk
 tf-keras
+langchain
+faiss-cpu
+sentence-transformers
+wikipedia-api
