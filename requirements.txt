@@ -8,4 +8,5 @@ langchain==0.1.12
 langchain-community
 faiss-cpu
 sentence-transformers
-wikipedia-api
+wikipedia
+torch==2.0.1
