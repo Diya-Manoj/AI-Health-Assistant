@@ -3,7 +3,8 @@ transformers
 tensorflow
 nltk
 tf-keras
-langchain
+langchain==0.1.12
+langchain-community
 faiss-cpu
 sentence-transformers
 wikipedia-api
