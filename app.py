@@ -24,6 +24,15 @@ except ImportError:
 
 FAISS_INDEX_PATH = "faiss_index"
 
+# ✅ Set User-Agent for Wikipedia API
+wiki = wikipediaapi.Wikipedia(user_agent="AI-Health-Assistant/1.0 (your-email@example.com)", language="en")
+page = wiki.page("Diabetes")
+
+if page.exists():
+    summary = page.summary[:500]
+else:
+    summary = "Wikipedia page not found."
+
 # ✅ Load Model (Cache to Reduce Loading Time)
 @st.cache_resource
 def load_model():
@@ -32,14 +41,6 @@ def load_model():
 
 hf_pipeline = load_model()
 llm = HuggingFacePipeline(pipeline=hf_pipeline)
-
-# ✅ Fix Wikipedia Loading with Correct Package
-wiki = wikipediaapi.Wikipedia("en")
-page = wiki.page("Diabetes")
-if page.exists():
-    summary = page.summary[:500]
-else:
-    summary = "Wikipedia page not found."
 
 # ✅ Optimize FAISS Retrieval
 @st.cache_resource
