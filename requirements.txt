@@ -1,9 +1,10 @@
 streamlit
 transformers
 nltk
-tf-keras
+torch==2.0.1
+torchvision
+torchaudio
 langchain==0.1.12
 langchain-community
 faiss-cpu
 sentence-transformers
-torch==2.0.1
