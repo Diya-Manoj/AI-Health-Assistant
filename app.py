@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+import subprocess
 import asyncio
 from langchain.chains import RetrievalQA
 from langchain_community.embeddings import HuggingFaceEmbeddings
@@ -8,18 +9,19 @@ from langchain_community.document_loaders import WikipediaLoader
 from langchain_community.llms import HuggingFacePipeline
 from transformers import pipeline
 
+# ✅ Force Install Missing Dependencies (Fix for Streamlit Cloud)
+required_packages = ["torch", "torchvision", "torchaudio"]
+for package in required_packages:
+    try:
+        __import__(package)
+    except ImportError:
+        subprocess.run(["pip", "install", package])
+
 # ✅ Fix "No Running Event Loop" Issue
 try:
     asyncio.get_running_loop()
 except RuntimeError:
     asyncio.run(asyncio.sleep(0))
-
-# ✅ Fix Missing Torch Installation
-try:
-    import torch
-except ImportError:
-    os.system("pip install torch torchvision torchaudio")
-    import torch
 
 FAISS_INDEX_PATH = "faiss_index"
 
