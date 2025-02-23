@@ -10,10 +10,14 @@ from langchain_community.llms import HuggingFacePipeline
 from transformers import pipeline
 
 # ✅ Force Install Missing Dependencies (Fix for Streamlit Cloud)
-required_packages = ["torch", "torchvision", "torchaudio"]
+required_packages = [
+    "torch==2.0.1", "torchvision", "torchaudio", 
+    "transformers", "nltk", "faiss-cpu", "langchain-community"
+]
+
 for package in required_packages:
     try:
-        __import__(package)
+        __import__(package.split("==")[0])
     except ImportError:
         subprocess.run(["pip", "install", package])
 
