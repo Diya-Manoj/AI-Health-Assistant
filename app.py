@@ -44,17 +44,34 @@ def healthcare_chatbot(user_input):
 
 # Streamlit web app
 def main():
-    st.title("Healthcare Assistant Chatbot")
+    st.title("Healthcare Assistant Chatbot🤖")
 
     # User input field
     user_input = st.text_input("Ask your health-related question:", "")
-
     if st.button("Submit"):
         if user_input:
             response = healthcare_chatbot(user_input)
             st.write("Healthcare Assistant: ", response)
         else:
             st.write("Please enter a query.")
+			
+	# Initialize Prediction History in session state if not exists
+	if 'history' not in st.session_state:
+		st.session_state['history'] = []
+		
+	# Reset Button
+	if st.button("🔄Reset"):
+		# Clear only inputs, retain history
+		st.session_state['last_inputs'] = []
+		st.rerun()
+		
+		# Ensure history is retained without resetting it
+	if 'last_inputs' not in st.session_state:
+		st.session_state['last_inputs'] = []
+	
+	# Sidebar for Prediction History
+	with st.sidebar:
+		st.header("📜Prediction History")
 
 if __name__ == "__main__":
     main()
