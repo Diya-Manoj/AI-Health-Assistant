@@ -7,7 +7,6 @@ from langchain_community.vectorstores import FAISS
 from langchain_community.document_loaders import WikipediaLoader
 from langchain_community.llms import HuggingFacePipeline
 from transformers import pipeline
-import wikipediaapi
 
 # ✅ Fix "No Running Event Loop" Issue
 try:
@@ -24,14 +23,9 @@ except ImportError:
 
 FAISS_INDEX_PATH = "faiss_index"
 
-# ✅ Set User-Agent for Wikipedia API
-wiki = wikipediaapi.Wikipedia(user_agent="AI-Health-Assistant/1.0 (your-email@example.com)", language="en")
-page = wiki.page("Diabetes")
-
-if page.exists():
-    summary = page.summary[:500]
-else:
-    summary = "Wikipedia page not found."
+# ✅ Use WikipediaLoader Instead of `wikipedia-api`
+loader = WikipediaLoader(query="Diabetes", lang="en")
+documents = loader.load()
 
 # ✅ Load Model (Cache to Reduce Loading Time)
 @st.cache_resource
@@ -49,8 +43,6 @@ def load_vectorstore():
     if os.path.exists(FAISS_INDEX_PATH):
         return FAISS.load_local(FAISS_INDEX_PATH, embeddings)
     else:
-        loader = WikipediaLoader(query="Diabetes", lang="en")  # ✅ Fetch only once
-        documents = loader.load()
         vectorstore = FAISS.from_documents(documents, embeddings)
         vectorstore.save_local(FAISS_INDEX_PATH)
         return vectorstore
