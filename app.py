@@ -44,34 +44,53 @@ def healthcare_chatbot(user_input):
 
 # Streamlit web app
 def main():
-    st.title("Healthcare Assistant Chatbot🤖")
+    import numpy as np
+    import pandas as pd
+
+    st.title("Healthcare Assistant Chatbot 🤖")
+    st.write("Ask your health-related question below and get AI-powered insights!")
+
+    # Initialize Prediction History in session state if not exists
+    if 'history' not in st.session_state:
+        st.session_state['history'] = []
 
     # User input field
-    user_input = st.text_input("Ask your health-related question:", "")
-    if st.button("Submit"):
+    user_input = st.text_input("💬 Your Question:", "")
+
+    # Predict Button
+    if st.button("🔍 Get Response"):
         if user_input:
-            response = healthcare_chatbot(user_input)
-            st.write("Healthcare Assistant: ", response)
+            response = healthcare_chatbot(user_input)  # Assuming function exists
+            st.success(f"🤖 Healthcare Assistant: **{response}**")
+
+            # Save Prediction History
+            st.session_state['history'].append((user_input, response))
         else:
-            st.write("Please enter a query.")
-			
-	# Initialize Prediction History in session state if not exists
-	if 'history' not in st.session_state:
-		st.session_state['history'] = []
-		
-	# Reset Button
-	if st.button("🔄Reset"):
-		# Clear only inputs, retain history
-		st.session_state['last_inputs'] = []
-		st.rerun()
-		
-		# Ensure history is retained without resetting it
-	if 'last_inputs' not in st.session_state:
-		st.session_state['last_inputs'] = []
-	
-	# Sidebar for Prediction History
-	with st.sidebar:
-		st.header("📜Prediction History")
+            st.warning("⚠️ Please enter a question before searching.")
+
+    # Reset Button
+    if st.button("🔄 Reset"):
+        # Clear only inputs, retain history
+        st.session_state['last_inputs'] = []
+        st.rerun()
+
+    # Ensure history is retained without resetting it
+    if 'last_inputs' not in st.session_state:
+        st.session_state['last_inputs'] = []
+
+    # Download Option
+    if user_input and 'response' in locals():
+        st.download_button("📥 Download Response", f"Your Question: {user_input}\nAI Response: {response}", file_name="health_response.txt")
+
+    # Sidebar for Prediction History
+    with st.sidebar:
+        st.header("📜 Previous Responses")
+        if st.session_state['history']:
+            for idx, (question, answer) in enumerate(st.session_state['history'][-5:]):
+                st.write(f"**{idx + 1}.** ❓ {question}")
+                st.write(f"👉 **{answer}**")
+        else:
+            st.write("No previous queries yet.")
 
 if __name__ == "__main__":
     main()
